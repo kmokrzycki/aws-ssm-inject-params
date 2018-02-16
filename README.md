@@ -1,62 +1,73 @@
-# jwt-token-encrypted
+# aws-ssm-inject-params
 
-This module allows you to generate JSON Web Tokens to encrypt part of its data and decrypt.
+Module allows to replace elements of object/structure with variables from AWS Parameter Store.
 
-## Using module
-```javascript
-import jwtCrypto from '@trufa/jwt-token-encrypted';
+This module is commonly used with Config generation that will make you application deployment simpler as well as independent from deployment environment.
+
+## Install
+```bash
+npm install aws-ssm-inject-params --save
 ```
 
-## Creating JWT
+## Usage
+```javascript
+import awsSsm from 'aws-ssm-inject-params';
+```
+
+### Putting **Parameter Store** data into data structure
+
+Prepare object with placeholder starting with: **aws-ssm:/**
 
 ```javascript
-// Data that will be publicly available
-let publicData = {
-    role: "user"
-};
-
-// Data that will only be available to users who know encryption details.
-let privateData = {
-    email: "user",
-    bank: "HSBC",
-    pin: "1234",
-};
-
-// Encryption settings
-let encryption = {
-    key: 'AAAAAAAAAAAAAA',
-    algorithm: 'aes-256-cbc',
-  };
-
-// JWT Settings
-let jwtDetails = {
-    iss: 'NKInVWhB1rVLCwxltMNuiUC6h9UudAbi',
-    data: {
-      public: { data1: 1, data2: 2, data3: 3 },
-      encData: '5fb8ed70a3864cbd97b25cc8ca2c0bc7',
+    const data = {
+        apiUrl: 'aws-ssm:///application/message',
+        enabled: true,
     }
-};
-
-let token = await jwtCrypto.generateJWT(
-      jwtDetails,
-      publicData,
-      encryptionSettings,
-      privateData
-    );
 ```
 
-## Reading JWT
+Using the module:
+```javascript
+    const dataWithValue = awsSsm.getValuesFromSsm(data);
+    console.log(dataWithValue);
+```
 
-``` javascript
-// Encryption settings
-let encryption = {
-    key: 'AAAAAAAAAAAAAA',
-    algorithm: 'aes-256-cbc',
-  };
+should print you data structure as below:
+```javascript
+    {
+        apiUrl: 'Hello AWS-SSM World !',
+        enabled: true
+    }
+```
 
-const decrypted = jwtCrypto.readJWT(token, encryption);
+### Prepare data in AWS with AWS CLI:
 
- ```
+#### Adding new parameter:
+```bash
+aws ssm put-parameter --name '/application/message' --value 'Hello AWS-SSM World !'  --type 'String'
+```
 
- ## Using decrypted data
- 
+#### Reading new parameter:
+```bash
+aws ssm get-parameters --names "/application/message"
+{
+    "Parameters": [
+        {
+            "Name": "/application/message",
+            "Type": "String",
+            "Value": "Hello AWS-SSM World !"
+        }
+    ],
+    "InvalidParameters": []
+}
+```
+## Troubleshooting
+### Missing region in config
+Please export AWS Region
+```bash
+export AWS_REGION='eu-west-1'
+```
+or if your system already has AWS_DEFAULT_REGION
+```bash
+export AWS_REGION=$AWS_DEFAULT_REGION
+```
+

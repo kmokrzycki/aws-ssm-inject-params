@@ -1,7 +1,7 @@
 {
   "name": "aws-ssm-inject-params",
-  "version": "0.0.1",
-  "description": "Add parameters from AWS Parameter Store  .",
+  "version": "1.0.0",
+  "description": "Add parameters from AWS Parameter Store.",
   "repository": {
     "type": "git",
     "url": "https://github.com/kmokrzycki/aws-ssm-inject-params.git"
