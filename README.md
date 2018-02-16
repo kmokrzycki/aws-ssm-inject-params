@@ -20,7 +20,7 @@ Prepare object with placeholder starting with: **aws-ssm:/**
 
 ```javascript
     const data = {
-        apiUrl: 'aws-ssm:///application/message',
+        apiUrl: 'aws-ssm://application/message',
         enabled: true,
     }
 ```
@@ -70,4 +70,6 @@ or if your system already has AWS_DEFAULT_REGION
 ```bash
 export AWS_REGION=$AWS_DEFAULT_REGION
 ```
+
+
 
