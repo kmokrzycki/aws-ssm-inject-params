@@ -47,7 +47,11 @@ const pullValueFromSsm = path => {
 
   const subKey = findLastPathKey(path);
   const parentResults = getSsmValueFromAws(subKey.path);
-  return cleanupResults(path, parentResults, true);
+  const cleanResults = cleanupResults(path, parentResults, true);
+  if (Object.keys(cleanResults).length === 0) {
+    throw new Error(`Path ${path} not found in parameter store!`);
+  }
+  return cleanResults;
 };
 
 const isSsmString = (element) => element.match(isSsmStringRegex);
@@ -76,5 +80,6 @@ export {
   pullValueFromSsm,
   isSsmString,
   lastPathToken,
+  getSsmValueFromAws,
 };
 

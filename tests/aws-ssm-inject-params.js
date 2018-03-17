@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import awsParamStore from 'aws-param-store';
 import * as SsmInject from '../src/aws-ssm-inject-params';
 
-const expect = chai.expect;
+const { expect } = chai;
 
 describe('findLastPathKey last path key from', () => {
   it('Find should return path and last element separated', async () => {
@@ -20,33 +20,38 @@ describe('Build structure from SSM', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     const newQuery = sandbox.stub(awsParamStore, 'newQuery');
-    newQuery.withArgs('/test/path/me1').returns({ executeSync: () =>
-      [{
-        Name: '/test/path/me1',
-        Type: 'String',
-        Value: 'value1',
-        Version: 3,
-      }],
+    newQuery.withArgs('/test/path/me1').returns({
+      executeSync: () =>
+        [{
+          Name: '/test/path/me1',
+          Type: 'String',
+          Value: 'value1',
+          Version: 3,
+        }],
     });
-    newQuery.withArgs('/test/path/me2').returns({ executeSync: () =>
-      [{
-        Name: '/test/path/me2',
-        Type: 'String',
-        Value: 'value2',
-        Version: 3,
-      }],
+    newQuery.withArgs('/test/path/me2').returns({
+      executeSync: () =>
+        [{
+          Name: '/test/path/me2',
+          Type: 'String',
+          Value: 'value2',
+          Version: 3,
+        }],
     });
-    newQuery.withArgs('/test/complex/path').returns({ executeSync: () =>
-      [{
-        Name: '/test/complex/path/element1',
-        Type: 'String',
-        Value: 'Element1',
-        Version: 2 },
-      { Name: '/test/complex/path/element2',
-        Type: 'String',
-        Value: 'Element2',
-        Version: 3,
-      }],
+    newQuery.withArgs('/test/complex/path').returns({
+      executeSync: () =>
+        [{
+          Name: '/test/complex/path/element1',
+          Type: 'String',
+          Value: 'Element1',
+          Version: 2,
+        },
+        {
+          Name: '/test/complex/path/element2',
+          Type: 'String',
+          Value: 'Element2',
+          Version: 3,
+        }],
     });
   });
 
@@ -86,25 +91,6 @@ describe('Build structure from SSM', () => {
     expect(result).to.deep.equal(expectedComplex);
   });
 });
-
-describe('Make sure isSmsString captures placeholders strings', () => {
-  it('Valid paths are recognized', async () => {
-    const result = SsmInject.isSsmString('aws-ssm://this/is/valid/path');
-    const expected = [
-      'aws-ssm://this/is/valid/path',
-      '/this/is/valid/path',
-    ];
-    expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
-  });
-  it('Invalid paths return nothing', async () => {
-    expect(SsmInject.isSsmString('//this/is/valid/path')).to.equal(null);
-    expect(SsmInject.isSsmString('ssm://this/is/valid/path')).to.equal(null);
-    expect(SsmInject.isSsmString('ssm:/this/is/valid/path')).to.equal(null);
-    expect(SsmInject.isSsmString('aws-ssm')).to.equal(null);
-    expect(SsmInject.isSsmString('aws-ssm-string')).to.equal(null);
-  });
-});
-
 
 describe('cleanupResults brings only values matching path same level', () => {
   it('Invalid paths return nothing', async () => {
@@ -147,3 +133,28 @@ describe('cleanupResults brings only values matching path level up', () => {
   });
 });
 
+describe('throw error whenever value missing in parameter store', () => {
+  let sandbox;
+
+  const wrongPath = '/this/wrong/path';
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    const newQuery = sandbox.stub(awsParamStore, 'newQuery');
+    newQuery.withArgs(wrongPath).returns({
+      executeSync: () => [],
+    });
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('Invalid paths throws error', async () => {
+    const throwFunction = () => {
+      SsmInject.getValuesFromSsm({ one: `aws-ssm:/${wrongPath}` });
+    };
+
+    expect(throwFunction).to.throw(Error);
+  });
+});

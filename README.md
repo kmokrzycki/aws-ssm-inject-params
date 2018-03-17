@@ -39,6 +39,19 @@ should print you data structure as below:
     }
 ```
 
+If given placeholder cannot be found in parameter store exception is thrown:
+
+```javascript
+    const data = {
+        apiUrl: 'aws-ssm://no/such/value',
+        enabled: true,
+    }
+```
+ will throw below Error:
+ ```
+ Path /no/such/value not found in parameter store!'
+ ```
+
 ### Prepare data in AWS with AWS CLI:
 
 #### Adding new parameter:
