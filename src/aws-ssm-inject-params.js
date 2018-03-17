@@ -4,9 +4,12 @@ import objectPath from 'object-path';
 
 const isSsmStringRegex = /^aws-ssm:\/(\/[\w-]+.*)/;
 const lastPathToken = /(.*?)(\/[^/]+)$/;
+const envPlaceholder = /\$\{([\w]+)\}/u;
+const envPlaceholderCleanup = /(^[^$]+)(\$\{)([\w]+)(\})(.*)/u;
 
 const findLastPathKey = path => {
   const matched = path.match(lastPathToken);
+
   if (matched) {
     return {
       path: matched[1],
@@ -15,6 +18,20 @@ const findLastPathKey = path => {
     };
   }
   return matched;
+};
+
+const replaceEnvPlaceholder = path => {
+  const hasEnvPlaceholder = path.match(envPlaceholder);
+  if (hasEnvPlaceholder) {
+    const envVariable = hasEnvPlaceholder[1];
+    const value = process.env[envVariable];
+    if (!value) {
+      throw new Error(`ENV Placeholder '${envVariable}' undefined ! `);
+    }
+    const replaced = path.replace(envPlaceholderCleanup, `$1${value}$5`);
+    return replaced;
+  }
+  return path;
 };
 
 const cleanupResults = (path, results, levelUp = false) => {
@@ -62,7 +79,8 @@ export default {
       if (typeof element === 'string') {
         const match = isSsmString(element);
         if (match) {
-          const newValue = pullValueFromSsm(match[1]) || '';
+          const finalName = replaceEnvPlaceholder(match[1]);
+          const newValue = pullValueFromSsm(finalName) || '';
           return newValue;
         }
       }
@@ -79,6 +97,7 @@ export {
   cleanupResults,
   pullValueFromSsm,
   isSsmString,
+  replaceEnvPlaceholder,
   lastPathToken,
   getSsmValueFromAws,
 };
