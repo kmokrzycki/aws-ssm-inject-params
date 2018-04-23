@@ -158,3 +158,24 @@ describe('throw error whenever value missing in parameter store', () => {
     expect(throwFunction).to.throw(Error);
   });
 });
+
+describe('support partial values in parameter store', () => {
+  it('Test value extracted from aws response.', () => {
+    const sandbox = sinon.sandbox.create();
+    const newQuery = sandbox.stub(awsParamStore, 'newQuery');
+    newQuery.returns({
+      executeSync: () =>
+        [{
+          Name: '/test/domain',
+          Type: 'String',
+          Value: 'http://my.domain.org',
+          Version: 3,
+        }],
+    });
+
+    const result = SsmInject.default.getValuesFromSsm('aws-ssm://test/domain|/service/path');
+    expect(result).to.deep.equal('http://my.domain.org/service/path');
+    sandbox.restore();
+  });
+});
+
