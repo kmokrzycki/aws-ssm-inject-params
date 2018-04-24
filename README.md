@@ -39,6 +39,32 @@ should print you data structure as below:
     }
 ```
 
+### Partial replacement
+
+Prepare object with placeholder starting with: **aws-ssm:/** and separating parameter store part with suffix  by **|**
+e.g.
+```javascript
+    const data = {
+        apiUrl: 'aws-ssm://my-service/host|/user/details',
+        enabled: true,
+    }
+```
+
+presuming aws-ssm://my-service/host is defined  and equals to:
+
+http://superuser.org
+
+result will be:
+```javascript
+    const data = {
+        apiUrl: 'http://superuser.org/user/details',
+        enabled: true,
+    }
+```
+
+
+### Missing parameter throws error !
+
 If given placeholder cannot be found in parameter store exception is thrown:
 
 ```javascript

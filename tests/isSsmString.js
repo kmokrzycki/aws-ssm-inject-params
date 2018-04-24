@@ -11,6 +11,16 @@ describe('Make sure isSmsString captures placeholders strings', () => {
     const expected = [
       'aws-ssm://this/is/valid/path',
       '/this/is/valid/path',
+      null,
+    ];
+    expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
+  });
+  it('Partial values are recognized', async () => {
+    const result = SsmInject.isSsmString('aws-ssm://this/is/partial|/path/after/value');
+    const expected = [
+      'aws-ssm://this/is/partial|/path/after/value',
+      '/this/is/partial',
+      '/path/after/value',
     ];
     expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
   });
