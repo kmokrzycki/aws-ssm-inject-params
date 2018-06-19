@@ -1,6 +1,6 @@
 {
   "name": "aws-ssm-inject-params",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Add parameters from AWS Parameter Store.",
   "repository": {
     "type": "git",
@@ -16,7 +16,10 @@
     "EC2 Parameter Store",
     "AWS Simple Secrets Management",
     "aws ssm inject values",
-    "aws ssm inject parameters"
+    "aws ssm inject parameters",
+    "ssm-config",
+    "ssm config",
+    "ssm configuration"
   ],
   "scripts": {
     "clean": "rimraf dist && rimraf compiled",
