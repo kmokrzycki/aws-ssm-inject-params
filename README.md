@@ -62,6 +62,27 @@ result will be:
     }
 ```
 
+### JSON parsing
+
+Prepare object with placeholder starting with: **aws-ssm-json:/**
+e.g.
+```javascript
+    const data = {
+        apiUrl: 'aws-ssm-json://my-service/json-serialized-object',
+        enabled: true,
+    }
+```
+
+presuming /my-service/json-serialized-objec is a valid JSON object:
+
+```javascript
+'{"intValue": 123, "stringValue": "value", "list": [1,2,3,4,5]}'
+```
+
+If string is not a valid JSON string error is thrown:
+```javascript
+Could not JSON parse /my-service/json-serialized-object => {"intValue": 123
+```
 
 ### Missing parameter throws error !
 
