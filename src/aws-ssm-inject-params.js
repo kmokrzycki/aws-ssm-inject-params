@@ -2,7 +2,7 @@ import traverse from 'traverse';
 import awsParamStore from 'aws-param-store';
 import objectPath from 'object-path';
 
-const isSsmStringRegex = /^aws-ssm:\/(\/[\w-]+[^|]*)\|?([^|]+)?/;
+const isSsmStringRegex = /^aws-ssm(-json)?:\/(\/[\w-]+[^|]*)\|?([^|]+)?/;
 const lastPathToken = /(.*?)(\/[^/]+)$/;
 
 const findLastPathKey = path => {
@@ -62,9 +62,17 @@ export default {
       if (typeof element === 'string') {
         const match = isSsmString(element);
         if (match) {
-          const newValue = pullValueFromSsm(match[1]) || '';
-          if (match.length >= 3 && match[2]) {
-            return newValue + match[2];
+          const newValue = pullValueFromSsm(match[2]) || '';
+          if (match.length >= 4 && match[3]) {
+            return newValue + match[3];
+          }
+
+          if (match[1]) {
+            try {
+              return JSON.parse(newValue);
+            } catch (e) {
+              throw new Error(`Could not JSON parse ${match[2]} => \n ${newValue}`);
+            }
           }
           return newValue;
         }
