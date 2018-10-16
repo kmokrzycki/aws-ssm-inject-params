@@ -211,6 +211,42 @@ describe('Support JSON values', () => {
     sandbox.restore();
   });
 
+  it('Test JSON boolean value extracted from aws response.', () => {
+    const sandbox = sinon.sandbox.create();
+    const newQuery = sandbox.stub(awsParamStore, 'newQuery');
+    newQuery.returns({
+      executeSync: () =>
+        [{
+          Name: '/test/bool',
+          Type: 'String',
+          Value: '{"key": "true"}',
+          Version: 3,
+        }],
+    });
+
+    const result = SsmInject.default.getValuesFromSsm('aws-ssm-json://test/bool');
+    expect(result).to.deep.equal({ key: true });
+    sandbox.restore();
+  });
+
+  it('Test JSON boolean false value extracted from aws response.', () => {
+    const sandbox = sinon.sandbox.create();
+    const newQuery = sandbox.stub(awsParamStore, 'newQuery');
+    newQuery.returns({
+      executeSync: () =>
+        [{
+          Name: '/test/bool',
+          Type: 'String',
+          Value: '{"key": "false"}',
+          Version: 3,
+        }],
+    });
+
+    const result = SsmInject.default.getValuesFromSsm('aws-ssm-json://test/bool');
+    expect(result).to.deep.equal({ key: false });
+    sandbox.restore();
+  });
+
   it('Throw Error if extracted value is not correct JSON format.', () => {
     const sandbox = sinon.sandbox.create();
     const newQuery = sandbox.stub(awsParamStore, 'newQuery');
