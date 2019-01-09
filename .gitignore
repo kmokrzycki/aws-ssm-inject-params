@@ -59,3 +59,5 @@ package-lock.json
 .env
 .temp_credentials
 
+compiled/**
+
