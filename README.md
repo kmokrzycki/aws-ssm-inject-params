@@ -69,7 +69,7 @@ e.g.
 ```javascript
     const data = {
         apiUrl: 'aws-ssm-json://my-service/json-serialized-object',
-        enabled: true,
+        enabled: 'aws-ssm-json://my-service/json-boolean-enabled',
     }
 ```
 
@@ -77,6 +77,12 @@ presuming /my-service/json-serialized-objec is a valid JSON object:
 
 ```javascript
 '{"intValue": 123, "stringValue": "value", "list": [1,2,3,4,5]}'
+```
+
+and /my-service/json-boolean-enabled is just string of "true" or "false" it would be converted to boolean json.
+
+```javascript
+"true"
 ```
 
 If string is not a valid JSON string error is thrown:

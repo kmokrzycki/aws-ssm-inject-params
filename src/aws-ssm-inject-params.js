@@ -69,9 +69,16 @@ export default {
 
           if (match[1]) {
             try {
-              return JSON.parse(newValue);
+              const parsed = JSON.parse(newValue);
+
+              if (parsed.key === 'true' || parsed.key === 'false') {
+                return {
+                  key: (parsed.key === 'true'),
+                };
+              }
+              return parsed;
             } catch (e) {
-              throw new Error(`Could not JSON parse ${match[2]} => \n ${newValue}`);
+              throw new Error(`Could not JSON parse ${match[2]} => ${newValue}`);
             }
           }
           return newValue;
