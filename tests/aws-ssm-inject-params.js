@@ -38,6 +38,15 @@ describe('Build structure from SSM', () => {
           Version: 3,
         }],
     });
+    newQuery.withArgs('/test/path/me3').returns({
+      executeSync: () =>
+        [{
+          Name: '/test/path/me3',
+          Type: 'String',
+          Value: '{"key": "value"}',
+          Version: 3,
+        }],
+    });
     newQuery.withArgs('/test/complex/path').returns({
       executeSync: () =>
         [{
@@ -68,13 +77,17 @@ describe('Build structure from SSM', () => {
     const data = {
       value1: 'aws-ssm://test/path/me1',
       value2: 'aws-ssm://test/path/me2',
-      value3: 'value-not-aws-3',
+      value3: 'aws-ssm-json://test/path/me3',
+      value4: 'value-not-aws-4',
     };
 
     const expected = {
       value1: 'value1',
       value2: 'value2',
-      value3: 'value-not-aws-3',
+      value3: {
+        key: 'value',
+      },
+      value4: 'value-not-aws-4',
     };
 
     const result = SsmInject.default.getValuesFromSsm(data);
@@ -175,6 +188,49 @@ describe('support partial values in parameter store', () => {
 
     const result = SsmInject.default.getValuesFromSsm('aws-ssm://test/domain|/service/path');
     expect(result).to.deep.equal('http://my.domain.org/service/path');
+    sandbox.restore();
+  });
+});
+
+describe('Support JSON values', () => {
+  it('Test JSON value extracted from aws response.', () => {
+    const sandbox = sinon.sandbox.create();
+    const newQuery = sandbox.stub(awsParamStore, 'newQuery');
+    newQuery.returns({
+      executeSync: () =>
+        [{
+          Name: '/test/object',
+          Type: 'String',
+          Value: '{"key": 123}',
+          Version: 3,
+        }],
+    });
+
+    const result = SsmInject.default.getValuesFromSsm('aws-ssm-json://test/object');
+    expect(result).to.deep.equal({ key: 123 });
+    sandbox.restore();
+  });
+
+  it('Throw Error if extracted value is not correct JSON format.', () => {
+    const sandbox = sinon.sandbox.create();
+    const newQuery = sandbox.stub(awsParamStore, 'newQuery');
+    newQuery.returns({
+      executeSync: () =>
+        [{
+          Name: '/test/object',
+          Type: 'String',
+          Value: '{"key": 123',
+          Version: 3,
+        }],
+    });
+
+    let errorMessage;
+    try {
+      SsmInject.default.getValuesFromSsm('aws-ssm-json://test/object');
+    } catch (error) {
+      errorMessage = error.message;
+    }
+    expect(errorMessage).to.deep.include('Could not JSON parse /test/object');
     sandbox.restore();
   });
 });
