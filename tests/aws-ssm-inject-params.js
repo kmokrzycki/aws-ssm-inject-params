@@ -266,7 +266,7 @@ describe('Support JSON values', () => {
     } catch (error) {
       errorMessage = error.message;
     }
-    expect(errorMessage).to.deep.equal('Could not JSON parse /test/object => {"key": 123');
+    expect(errorMessage).to.deep.include('Could not JSON parse /test/object');
     sandbox.restore();
   });
 });
