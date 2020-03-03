@@ -1,6 +1,6 @@
-import traverse from 'traverse';
-import awsParamStore from 'aws-param-store';
-import objectPath from 'object-path';
+const traverse = require('traverse');
+const awsParamStore = require('aws-param-store');
+const objectPath = require('object-path');
 
 const isSsmStringRegex = /^aws-ssm(-json)?:\/(\/[\w-]+[^|]*)\|?([^|]+)?/;
 const lastPathToken = /(.*?)(\/[^/]+)$/;
@@ -36,14 +36,16 @@ const cleanupResults = (path, results, levelUp = false) => {
   return newStructure;
 };
 
-const getSsmValueFromAws = (path) => {
+const getSsmValueFromAws = path => {
   const result = awsParamStore.newQuery(path).executeSync();
   return result;
 };
 
 const pullValueFromSsm = path => {
   const results = getSsmValueFromAws(path);
-  if (results.length > 0) return cleanupResults(path, results);
+  if (results.length > 0) {
+    return cleanupResults(path, results);
+  }
 
   const subKey = findLastPathKey(path);
   const parentResults = getSsmValueFromAws(subKey.path);
@@ -54,50 +56,41 @@ const pullValueFromSsm = path => {
   return cleanResults;
 };
 
-const isSsmString = (element) => element.match(isSsmStringRegex);
+const isSsmString = element => element.match(isSsmStringRegex);
 
-export default {
-  getValuesFromSsm(data) {
-    return traverse(data).map(element => {
-      if (typeof element === 'string') {
-        const match = isSsmString(element);
-        if (match) {
-          const newValue = pullValueFromSsm(match[2]) || '';
-          if (match.length >= 4 && match[3]) {
-            return newValue + match[3];
+const getValuesFromSsm = data => traverse(data).map(element => {
+  if (typeof element === 'string') {
+    const match = isSsmString(element);
+    if (match) {
+      const newValue = pullValueFromSsm(match[2]) || '';
+      if (match.length >= 4 && match[3]) {
+        return newValue + match[3];
+      }
+
+      if (match[1]) {
+        try {
+          const parsed = JSON.parse(newValue);
+
+          if (parsed.key === 'true' || parsed.key === 'false') {
+            return {
+              key: parsed.key === 'true',
+            };
           }
-
-          if (match[1]) {
-            try {
-              const parsed = JSON.parse(newValue);
-
-              if (parsed.key === 'true' || parsed.key === 'false') {
-                return {
-                  key: (parsed.key === 'true'),
-                };
-              }
-              return parsed;
-            } catch (e) {
-              throw new Error(`Could not JSON parse ${match[2]} => ${newValue}`);
-            }
-          }
-          return newValue;
+          return parsed;
+        } catch (e) {
+          throw new Error(`Could not JSON parse ${match[2]} => ${newValue}`);
         }
       }
-      return element;
-    });
-  },
-  getSsmValue(path) {
-    return getSsmValueFromAws(path);
-  },
-};
+      return newValue;
+    }
+  }
+  return element;
+});
 
-export {
+module.exports = {
+  getValuesFromSsm,
+  isSsmString,
+  pullValueFromSsm,
   findLastPathKey,
   cleanupResults,
-  pullValueFromSsm,
-  isSsmString,
-  lastPathToken,
-  getSsmValueFromAws,
 };
-

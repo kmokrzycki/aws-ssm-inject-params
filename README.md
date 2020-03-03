@@ -11,7 +11,7 @@ npm install aws-ssm-inject-params --save
 
 ## Usage
 ```javascript
-import awsSsm from 'aws-ssm-inject-params';
+const awsParamStore = require('aws-param-store');
 ```
 
 ### Putting **Parameter Store** data into data structure
