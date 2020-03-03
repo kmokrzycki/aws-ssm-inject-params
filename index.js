@@ -1,1 +1,1 @@
-module.exports = require('./compiled/aws-ssm-inject-params');
+module.exports = require('./aws-ssm-inject-params');

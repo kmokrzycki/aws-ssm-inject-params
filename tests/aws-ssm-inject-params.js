@@ -2,7 +2,7 @@
 const chai = require('chai');
 const sinon = require('sinon');
 const awsParamStore = require('aws-param-store');
-const SsmInject = require('../src/aws-ssm-inject-params');
+const SsmInject = require('../aws-ssm-inject-params');
 
 const { expect } = chai;
 
