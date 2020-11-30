@@ -1,6 +1,6 @@
 /* eslint-env jest */
-const chai = require('chai');
-const SsmInject = require('../aws-ssm-inject-params');
+import chai from 'chai';
+import * as SsmInject from '../src/aws-ssm-inject-params';
 
 
 const { expect } = chai;

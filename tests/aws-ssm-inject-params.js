@@ -1,8 +1,8 @@
 /* eslint-env jest */
-const chai = require('chai');
-const sinon = require('sinon');
-const awsParamStore = require('aws-param-store');
-const SsmInject = require('../aws-ssm-inject-params');
+import chai from 'chai';
+import sinon from 'sinon';
+import awsParamStore from 'aws-param-store';
+import * as SsmInject from '../src/aws-ssm-inject-params';
 
 const { expect } = chai;
 
@@ -90,16 +90,17 @@ describe('Build structure from SSM', () => {
       value4: 'value-not-aws-4',
     };
 
-    const result = SsmInject.getValuesFromSsm(data);
+    const result = SsmInject.default.getValuesFromSsm(data);
     expect(result).to.deep.equal(expected);
   });
 
   it('Test value extracted from aws response.', () => {
-    const result = SsmInject.getValuesFromSsm('aws-ssm://test/complex/path');
+    const result = SsmInject.default.getValuesFromSsm('aws-ssm://test/complex/path');
     const expectedComplex = {
       element1: 'Element1',
       element2: 'Element2',
     };
+
     expect(result).to.deep.equal(expectedComplex);
   });
 });
@@ -185,7 +186,7 @@ describe('support partial values in parameter store', () => {
         }],
     });
 
-    const result = SsmInject.getValuesFromSsm('aws-ssm://test/domain|/service/path');
+    const result = SsmInject.default.getValuesFromSsm('aws-ssm://test/domain|/service/path');
     expect(result).to.deep.equal('http://my.domain.org/service/path');
     sandbox.restore();
   });
@@ -205,7 +206,7 @@ describe('Support JSON values', () => {
         }],
     });
 
-    const result = SsmInject.getValuesFromSsm('aws-ssm-json://test/object');
+    const result = SsmInject.default.getValuesFromSsm('aws-ssm-json://test/object');
     expect(result).to.deep.equal({ key: 123 });
     sandbox.restore();
   });
@@ -223,7 +224,7 @@ describe('Support JSON values', () => {
         }],
     });
 
-    const result = SsmInject.getValuesFromSsm('aws-ssm-json://test/bool');
+    const result = SsmInject.default.getValuesFromSsm('aws-ssm-json://test/bool');
     expect(result).to.deep.equal({ key: true });
     sandbox.restore();
   });
@@ -241,7 +242,7 @@ describe('Support JSON values', () => {
         }],
     });
 
-    const result = SsmInject.getValuesFromSsm('aws-ssm-json://test/bool');
+    const result = SsmInject.default.getValuesFromSsm('aws-ssm-json://test/bool');
     expect(result).to.deep.equal({ key: false });
     sandbox.restore();
   });
@@ -261,7 +262,7 @@ describe('Support JSON values', () => {
 
     let errorMessage;
     try {
-      SsmInject.getValuesFromSsm('aws-ssm-json://test/object');
+      SsmInject.default.getValuesFromSsm('aws-ssm-json://test/object');
     } catch (error) {
       errorMessage = error.message;
     }
