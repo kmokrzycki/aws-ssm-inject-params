@@ -30,7 +30,9 @@
     "lintfix": "eslint ./src --fix",
     "test": "./node_modules/.bin/mocha --recursive ./tests/ --compilers js:babel-core/register",
     "test:coverage": "nyc --reporter=lcov --reporter=text ./node_modules/.bin/mocha --recursive --require babel-register ./tests/",
-    "test:watch": "npm test -- --watch"
+    "test:watch": "npm test -- --watch",
+    "snyk-protect": "snyk protect",
+    "prepare": "yarn run snyk-protect"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -56,6 +58,8 @@
     "aws-param-store": "^1.1.0",
     "aws-sdk": "^2.196.0",
     "object-path": "^0.11.4",
-    "traverse": "^0.6.6"
-  }
+    "traverse": "^0.6.6",
+    "snyk": "^1.431.3"
+  },
+  "snyk": true
 }
